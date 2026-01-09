@@ -60,12 +60,12 @@ app = Client("4gb_FileRenameBot", api_id=Config.API_ID, api_hash=Config.API_HASH
 
 @Client.on_message(filters.private & (filters.audio | filters.document | filters.video))
 async def rename_start(client, message):
+    user_id  = message.from_user.id
+    rkn_file = getattr(message, message.media.value)
     if not Config.STRING_SESSION:
         if rkn_file.file_size > 2000 * 1024 * 1024:
              return await message.reply_text("Sᴏʀʀy Bʀᴏ Tʜɪꜱ Bᴏᴛ Iꜱ Dᴏᴇꜱɴ'ᴛ Sᴜᴩᴩᴏʀᴛ Uᴩʟᴏᴀᴅɪɴɢ Fɪʟᴇꜱ Bɪɢɢᴇʀ Tʜᴀɴ 2Gʙ+")
-
-    user_id  = message.from_user.id
-    rkn_file = getattr(message, message.media.value)
+   
     filename = rkn_file.file_name
     if not "." in filename:
         if "." in filename:
