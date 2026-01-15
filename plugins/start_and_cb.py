@@ -47,10 +47,10 @@ from plugins.file_rename import upload_doc
 @Client.on_message(filters.private & filters.command("start"))
 async def start(client, message):
     start_button = [[        
-        InlineKeyboardButton('Uᴩᴅᴀ𝚃ᴇꜱ', url='https://t.me/Digital_Botz'),
-        InlineKeyboardButton('Sᴜᴩᴩᴏʀ𝚃', url='https://t.me/DigitalBotz_Support')
+        InlineKeyboardButton('ᴜᴘᴅᴀᴛᴇ ', url='https://t.me/OveshBossOfficial'),
+        InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://t.me/OnlyBossMoviesGroup')
         ],[
-        InlineKeyboardButton('Aʙᴏυᴛ', callback_data='about'),
+        InlineKeyboardButton('💌 ᴀʙᴏᴜᴛ', callback_data='about'),
         InlineKeyboardButton('Hᴇʟᴩ', callback_data='help')       
          ]]
         
@@ -77,7 +77,7 @@ async def cb_handler(client, query: CallbackQuery):
         
         await query.message.edit_text(
             text=rkn.START_TXT.format(query.from_user.mention),
-            disable_web_page_preview=True,
+  📁          disable_web_page_preview=True,
             reply_markup = InlineKeyboardMarkup(start_button))
         
     elif data == "help":
@@ -98,7 +98,7 @@ async def cb_handler(client, query: CallbackQuery):
     elif data == "about":
         about_button = [[
          #⚠️ don't change source code & source link ⚠️ #
-        InlineKeyboardButton("𝚂ᴏᴜʀᴄᴇ", callback_data = "source_code"), #Whoever is deploying this repo is given a warning ⚠️ not to remove this repo link #first & last warning ⚠️
+        InlineKeyboardButton("sᴏᴜʀᴄᴇ", callback_data = "source_code"), #Whoever is deploying this repo is given a warning ⚠️ not to remove this repo link #first & last warning ⚠️
         InlineKeyboardButton("ʙᴏᴛ sᴛᴀᴛᴜs", callback_data = "bot_status")
         ],[
         InlineKeyboardButton("ʟɪᴠᴇ sᴛᴀᴛᴜs", callback_data = "live_status")           
@@ -166,7 +166,7 @@ async def cb_handler(client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup([[
                 #⚠️ don't change source code & source link ⚠️ #
            #Whoever is deploying this repo is given a warning ⚠️ not to remove this repo link #first & last warning ⚠️   
-                InlineKeyboardButton("💞 Sᴏᴜʀᴄᴇ Cᴏᴅᴇ 💞", url="https://github.com/DigitalBotz/Digital-Auto-Rename-Bot")
+                InlineKeyboardButton("💞 Sᴏᴜʀᴄᴇ Cᴏᴅᴇ 💞", url="https://github.com/OveshBoss/Digital-Auto-Rename-Bot")
             ],[
                 InlineKeyboardButton("🔒 Cʟᴏꜱᴇ", callback_data = "close"),
                 InlineKeyboardButton("◀️ Bᴀᴄᴋ", callback_data = "start")
