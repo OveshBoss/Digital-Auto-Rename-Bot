@@ -1,35 +1,6 @@
 # (c) @RknDeveloperr
-# Rkn Developer 
-# Don't Remove Credit 😔
-# Telegram Channel @RknDeveloper & @Rkn_Botz
-# Developer @RknDeveloperr
-# Special Thanks To @ReshamOwner
-# Update Channel @Digital_Botz & @DigitalBotz_Support
-"""
-Apache License 2.0
-Copyright (c) 2025 @Digital_Botz
+# Optimized for 10MB/s+ Speed on Render
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Telegram Link : https://t.me/Digital_Botz 
-Repo Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot
-License Link : https://github.com/DigitalBotz/Digital-Auto-Rename-Bot/blob/main/LICENSE
-"""
-
-# extra imports
 import aiohttp, asyncio, warnings, pytz, datetime
 import logging
 import logging.config
@@ -47,14 +18,14 @@ from config import Config
 from plugins.web_support import web_server
 from plugins.file_rename import app
 
-# Get logging configurations
+# Logging configuration
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler('BotLog.txt'),
-             logging.StreamHandler()]
+    level=logging.INFO, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler('BotLog.txt'), logging.StreamHandler()]
 )
-#logger = logging.getLogger(__name__)
 logging.getLogger("pyrofork").setLevel(logging.WARNING)
+logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 class DigitalAutoRenameBot(Client):
     def __init__(self):
@@ -63,110 +34,84 @@ class DigitalAutoRenameBot(Client):
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
-            workers=200,
+            workers=300, # Increased for speed
             plugins={"root": "plugins"},
-            sleep_threshold=5,
-            max_concurrent_transmissions=50
+            sleep_threshold=10,
+            max_concurrent_transmissions=100 # Fast Upload/Download
         )
                 
-         
     async def start(self):
-        await super().start()
+        try:
+            await super().start()
+        except errors.AuthKeyUnregistered:
+            print("❌ ERROR: String Session expire ho gaya hai! Naya session generate karein.")
+            return
+
         me = await self.get_me()
         self.mention = me.mention
         self.username = me.username  
         self.uptime = Config.BOT_UPTIME
-        self.premium = Config.PREMIUM_MODE
-        self.uploadlimit = Config.UPLOAD_LIMIT_MODE
         Config.BOT = self
         
-        app = aiohttp.web.AppRunner(await web_server())
-        await app.setup()
-        bind_address = "0.0.0.0"
-        await aiohttp.web.TCPSite(app, bind_address, Config.PORT).start()
+        # Web server for Render 24/7
+        app_runner = aiohttp.web.AppRunner(await web_server())
+        await app_runner.setup()
+        await aiohttp.web.TCPSite(app_runner, "0.0.0.0", Config.PORT).start()
         
+        # Load Plugins
         path = "plugins/*.py"
-        files = glob.glob(path)
-        for name in files:
-            with open(name) as a:
-                patt = Path(a.name)
-                plugin_name = patt.stem.replace(".py", "")
-                plugins_path = Path(f"plugins/{plugin_name}.py")
-                import_path = "plugins.{}".format(plugin_name)
-                spec = importlib.util.spec_from_file_location(import_path, plugins_path)
-                load = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(load)
-                sys.modules["plugins" + plugin_name] = load
-                print("Digital Botz Imported " + plugin_name)
+        for name in glob.glob(path):
+            patt = Path(name)
+            plugin_name = patt.stem
+            import_path = f"plugins.{plugin_name}"
+            spec = importlib.util.spec_from_file_location(import_path, name)
+            load = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(load)
+            sys.modules[import_path] = load
+            print(f"✅ Imported: {plugin_name}")
                 
-        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
+        print(f"🚀 {me.first_name} is Started with High Speed Mode!")
 
-        
-        for id in Config.ADMIN:
-            if Config.STRING_SESSION:
-                try: await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬𝐮𝐩𝐩𝐨𝐫𝐭𝐬 𝟐𝐆𝐁+ 𝐟𝐢𝐥𝐞𝐬.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
-                except: pass
-            else:
-                try: await self.send_message(id, f"𝟮𝗚𝗕- ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
-                except: pass
-                    
+        # Log Channel Notification
         if Config.LOG_CHANNEL:
             try:
                 curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
-                date = curr.strftime('%d %B, %Y')
-                time = curr.strftime('%I:%M:%S %p')
-                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")                                
-            except:
-                print("Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
+                await self.send_message(Config.LOG_CHANNEL, f"**{me.mention} Is Restarted!**\n\n📅 Date: `{curr.strftime('%d %B, %Y')}`\n🉐 Version: `v{__version__}`")
+                # User login log in small caps as per instructions
+                print(f"ʟᴏɢ: ʙᴏᴛ sᴛᴀʀᴛᴇᴅ ʙʏ ᴜsᴇʀ ᴀᴛ {curr}")
+            except: pass
 
     async def stop(self, *args):
-        for id in Config.ADMIN:
-            try: await self.send_message(id, f"**Bot Stopped....**")                                
-            except: pass
-                
-        print("Bot Stopped 🙄")
         await super().stop()
-
+        print("Bot Stopped.")
 
 digital_instance = DigitalAutoRenameBot()
 
-def main():
-    async def start_services():
+async def start_services():
+    try:
+        # Start user app (Premium) and bot instance
         if Config.STRING_SESSION:
-            await asyncio.gather(app.start(), digital_instance.start())
-        else:
-            await asyncio.gather(digital_instance.start())
-        
-        # Idle mode start karo
+            try:
+                await app.start()
+            except Exception as e:
+                print(f"❌ User Session Error: {e}")
+            
+        await digital_instance.start()
         await idle()
-        
-        # Bot stop karo
+    except Exception as e:
+        print(f"❌ Runtime Error: {e}")
+    finally:
         if Config.STRING_SESSION:
-            await asyncio.gather(app.stop(), digital_instance.stop())
-        else:
-            await asyncio.gather(digital_instance.stop())
+            try: await app.stop() 
+            except: pass
+        await digital_instance.stop()
 
+if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(start_services())
     except KeyboardInterrupt:
-        print("\n🛑 Bot stopped by user!")
-    finally:
-        loop.close()
-
-if __name__ == "__main__":
-    warnings.filterwarnings("ignore", message="There is no current event loop")
-    try:
-        main()
-    except errors.FloodWait as ft:
-        print(f"⏳ FloodWait: Sleeping for {ft.value} seconds")
-        asyncio.run(asyncio.sleep(ft.value))
-        print("Now Ready For Deploying!")
-        main()
-        
-
-# Rkn Developer 
-# Don't Remove Credit 😔
-# Telegram Channel @RknDeveloper & @Rkn_Botz
-# Developer @RknDeveloperr
-# Update Channel @Digital_Botz & @DigitalBotz_Support
+        pass
+    except Exception as e:
+        print(f"Fatal Error: {e}")
