@@ -36,23 +36,22 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
         "▢" * (20 - int(percentage // 5))
     )
 
-    text = (
-        f"{ud_type}\n\n"
-        f"{progress_bar}\n"
-        f"{rkn.RKN_PROGRESS.format(
-            round(percentage, 2),
-            humanbytes(current),
-            humanbytes(total),
-            humanbytes(speed),
-            TimeFormatter(total_time)
-        )}"
+    # FIXED: String format fixed to avoid SyntaxError
+    rkn_text = rkn.RKN_PROGRESS.format(
+        round(percentage, 2),
+        humanbytes(current),
+        humanbytes(total),
+        humanbytes(speed),
+        TimeFormatter(total_time)
     )
+
+    text = f"{ud_type}\n\n{progress_bar}\n{rkn_text}"
 
     try:
         await message.edit(
             text=text,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("✖️ cancel ✖️", callback_data="close")]]
+                [[InlineKeyboardButton("✖️ ᴄᴀɴᴄᴇʟ ✖️", callback_data="close")]]
             )
         )
     except:
@@ -104,14 +103,15 @@ async def send_log(bot, user):
         return
 
     now = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+    # ʟᴏɢɢɪɴɢ ɪɴ sᴍᴀʟʟ ᴄᴀᴘs ᴀs ᴘᴇʀ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ
     text = (
-        "**new user started bot**\n\n"
-        f"user: {user.mention}\n"
-        f"id: `{user.id}`\n"
-        f"username: @{user.username}\n\n"
-        f"date: {now.strftime('%d %b %Y')}\n"
-        f"time: {now.strftime('%I:%M:%S %p')}\n\n"
-        f"by: {bot.mention}"
+        "**ɴᴇᴡ ᴜsᴇʀ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ**\n\n"
+        f"ᴜsᴇʀ: {user.mention}\n"
+        f"ɪᴅ: `{user.id}`\n"
+        f"ᴜsᴇʀɴᴀᴍᴇ: @{user.username}\n\n"
+        f"ᴅᴀᴛᴇ: {now.strftime('%d %b %Y')}\n"
+        f"ᴛɪᴍᴇ: {now.strftime('%I:%M:%S %p')}\n\n"
+        f"ʙʏ: {bot.mention}"
     )
 
     await bot.send_message(Config.LOG_CHANNEL, text)
