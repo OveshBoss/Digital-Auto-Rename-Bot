@@ -1,19 +1,22 @@
-# Use the official Python image
-FROM python:3.9-slim-buster
+# 1. Purane 'buster' ko 'bullseye' se badla (Error Fix)
+FROM python:3.9-slim-bullseye
 
-RUN apt-get update -qq && apt-get -y install ffmpeg
+# 2. System update aur ffmpeg install (Fast & Clean)
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends ffmpeg git && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
+# 3. Dependencies install karein
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Install any needed dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code to the working directory
 COPY . .
 
-# Command to run the application
-CMD ["python", "bot.py"]
+# 4. Render Port Fix (Iske bina bot kill ho jata hai)
+EXPOSE 10000
+
+# 5. Bot start command
+CMD ["python3", "bot.py"]
