@@ -17,7 +17,7 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
     now = time.time()
     diff = now - start
 
-    # edit only every ~5 sec or on finish (huge speed gain)
+    # update every 5 sec or on finish
     if current != total and diff < 5:
         return
 
@@ -38,8 +38,14 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
 
     text = (
         f"{ud_type}\n\n"
-        f"{progress_bar}"
-        f"{rkn.RKN_PROGRESS.format( round(percentage,2), humanbytes(current), humanbytes(total), humanbytes(speed), TimeFormatter(total_time) )}"
+        f"{progress_bar}\n"
+        f"{rkn.RKN_PROGRESS.format(
+            round(percentage, 2),
+            humanbytes(current),
+            humanbytes(total),
+            humanbytes(speed),
+            TimeFormatter(total_time)
+        )}"
     )
 
     try:
@@ -66,7 +72,7 @@ def humanbytes(size):
         size /= power
         n += 1
 
-    return f"{round(size,2)} {units[n]}"
+    return f"{round(size, 2)} {units[n]}"
 
 def TimeFormatter(milliseconds: int) -> str:
     seconds, ms = divmod(int(milliseconds), 1000)
@@ -81,7 +87,7 @@ def TimeFormatter(milliseconds: int) -> str:
     if seconds: out.append(f"{seconds}s")
     if ms: out.append(f"{ms}ms")
 
-    return ", ".join(out)
+    return ", ".join(out) if out else "0s"
 
 def convert(seconds):
     seconds %= 86400
@@ -122,9 +128,43 @@ async def get_seconds_first(time_string):
         "year": 31536000
     }
 
-    parts = time_string.split()
+    parts = time_string.lower().split()
     total = 0
 
     for i in range(0, len(parts), 2):
-        try:
-            total += int(parts[i]) * factors.get(parts[i+1].rstrip("s"), 0
+        if i + 1 < len(parts):
+            try:
+                total += int(parts[i]) * factors.get(parts[i + 1].rstrip("s"), 0)
+            except:
+                pass
+
+    return total
+
+async def get_seconds(time_string):
+    factors = {
+        "s": 1,
+        "min": 60,
+        "hour": 3600,
+        "day": 86400,
+        "month": 2592000,
+        "year": 31536000
+    }
+
+    total = 0
+    matches = re.findall(r"(\d+)\s*(\w+)", time_string.lower())
+
+    for value, unit in matches:
+        total += int(value) * factors.get(unit.rstrip("s"), 0)
+
+    return total
+
+# ===================== file helpers ===================== #
+
+async def add_prefix_suffix(filename, prefix="", suffix=""):
+    base, ext = os.path.splitext(filename)
+    return f"{prefix} {base} {suffix}{ext}".strip()
+
+async def remove_path(*paths):
+    for path in paths:
+        if path and os.path.exists(path):
+            os.remove(path)
