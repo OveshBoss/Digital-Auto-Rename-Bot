@@ -1,5 +1,5 @@
 pyrofork==2.3.69
-TgCrypto-pyrofork==1.2.8
+tgcrypto
 motor==3.6.0
 dnspython==2.7.0
 hachoir==3.3.0
@@ -8,3 +8,4 @@ aiohttp==3.11.11
 pytz==2024.2
 psutil==6.1.1
 ffmpeg-python
+aiofiles
