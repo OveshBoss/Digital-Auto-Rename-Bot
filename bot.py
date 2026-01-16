@@ -5,10 +5,6 @@
 # Developer @RknDeveloperr
 # Special Thanks To @ReshamOwner
 # Update Channel @Digital_Botz & @DigitalBotz_Support
-"""
-Apache License 2.0
-Copyright (c) 2025 @Digital_Botz
-"""
 
 # extra imports
 import aiohttp, asyncio, warnings, pytz, datetime
@@ -34,7 +30,6 @@ logging.basicConfig(
     handlers=[logging.FileHandler('BotLog.txt'),
              logging.StreamHandler()]
 )
-#logger = logging.getLogger(__name__)
 logging.getLogger("pyrofork").setLevel(logging.WARNING)
 
 class DigitalAutoRenameBot(Client):
@@ -44,13 +39,13 @@ class DigitalAutoRenameBot(Client):
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
-            workers=200,
+            workers=300, # Fast processing
             plugins={"root": "plugins"},
-            sleep_threshold=5,
-            max_concurrent_transmissions=50
+            sleep_threshold=10, # Speed ke liye zaroori
+            max_concurrent_transmissions=100 # ULTRA FAST DOWNLOAD/UPLOAD
         )
-                
-         
+
+
     async def start(self):
         await super().start()
         me = await self.get_me()
@@ -60,64 +55,38 @@ class DigitalAutoRenameBot(Client):
         self.premium = Config.PREMIUM_MODE
         self.uploadlimit = Config.UPLOAD_LIMIT_MODE
         Config.BOT = self
-        
+
         app_runner = aiohttp.web.AppRunner(await web_server())
         await app_runner.setup()
         bind_address = "0.0.0.0"
         await aiohttp.web.TCPSite(app_runner, bind_address, Config.PORT).start()
-        
-        path = "plugins/*.py"
-        files = glob.glob(path)
-        for name in files:
-            with open(name) as a:
-                patt = Path(a.name)
-                plugin_name = patt.stem.replace(".py", "")
-                plugins_path = Path(f"plugins/{plugin_name}.py")
-                import_path = "plugins.{}".format(plugin_name)
-                spec = importlib.util.spec_from_file_location(import_path, plugins_path)
-                load = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(load)
-                sys.modules["plugins" + plugin_name] = load
-                print("ᴅɪɢɪᴛᴀʟ ʙᴏᴛᴢ ɪᴍᴘᴏʀᴛᴇᴅ " + plugin_name)
-                
-        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
-        # --- Attractive Welcome Message for Admin ---
-        welcome_text = (
-            f"🚀 **{me.first_name.upper()} ɪs ɴᴏᴡ ᴀʟɪᴠᴇ!**\n\n"
-            f"🤖 **ᴍᴏᴅᴇ:** `ᴀɪ-ᴘᴏᴡᴇʀᴇᴅ ᴜʟᴛʀᴀ ғᴀsᴛ`\n"
-            f"⚡ **sᴘᴇᴇᴅ:** `ᴜʟᴛʀᴀ sᴏɴɪᴄ ᴘᴏᴡᴇʀ`\n"
-            f"📂 **sᴛᴀᴛᴜs:** `ʀᴇᴀᴅʏ ᴛᴏ ʀᴇɴᴀᴍᴇ`\n\n"
-            f"🌟 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ: @OveshBossOfficial**\n"
-            f"👨‍💻 **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @RknDeveloperr**"
-        )
+        # LOGGING IN SMALL CAPS AS REQUESTED
+        print(f"🚀 {me.first_name.lower()} sᴛᴀʀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ")
+
 
         for id in Config.ADMIN:
-            try: await self.send_message(id, welcome_text)                                
-            except: pass
-                    
+            if Config.STRING_SESSION:
+                try: await self.send_message(id, f"𝟮𝗚𝗕+ ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\nNote: 𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦 𝐩𝐫𝐞𝐦𝐢𝐮𝐦 𝐚𝐜𝐜𝐨𝐮𝐧𝐭 𝐬𝐭𝐫𝐢𝐧𝐠 𝐬𝐞𝐬𝐬𝐢𝐨𝐧 𝐫𝐞𝐪𝐮𝐢𝐫𝐞𝐝 𝐓𝐡𝐞𝐧 𝐬𝐮𝐩𝐩𝐨𝐫𝐭𝐬 𝟐𝐆𝐁+ 𝐟𝐢𝐥𝐞𝐬.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
+                except: pass
+            else:
+                try: await self.send_message(id, f"𝟮𝗚𝗕- ғɪʟᴇ sᴜᴘᴘᴏʀᴛ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ʙᴏᴛ.\n\n**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
+                except: pass
+
         if Config.LOG_CHANNEL:
             try:
                 curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
                 date = curr.strftime('%d %B, %Y')
                 time = curr.strftime('%I:%M:%S %p')
-                # Attractive Log Message
-                log_msg = (
-                    f"✨ **{me.mention} ʀᴇsᴛᴀʀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ !!**\n\n"
-                    f"📅 **ᴅᴀᴛᴇ :** `{date}`\n"
-                    f"⏰ **ᴛɪᴍᴇ :** `{time}`\n"
-                    f"🚀 **ᴇɴɢɪɴᴇ :** `ᴀɪ ᴘᴏᴡᴇʀᴇᴅ ᴘᴏᴡᴇʀғᴜʟ`\n\n"
-                    f"👑 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ : @OveshBossOfficial**"
-                )
-                await self.send_message(Config.LOG_CHANNEL, log_msg)                                
+                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")                                
             except:
                 print("Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
 
     async def stop(self, *args):
         for id in Config.ADMIN:
-            try: await self.send_message(id, f"**ʙᴏᴛ sᴛᴏᴘᴘᴇᴅ....**")                                
+            try: await self.send_message(id, f"**Bot Stopped....**")                                
             except: pass
-                
+
         print("Bot Stopped 🙄")
         await super().stop()
 
@@ -130,9 +99,9 @@ def main():
             await asyncio.gather(app.start(), digital_instance.start())
         else:
             await asyncio.gather(digital_instance.start())
-        
+
         await idle()
-        
+
         if Config.STRING_SESSION:
             await asyncio.gather(app.stop(), digital_instance.stop())
         else:
@@ -151,6 +120,5 @@ if __name__ == "__main__":
     try:
         main()
     except errors.FloodWait as ft:
-        print(f"⏳ FloodWait: Sleeping for {ft.value} seconds")
         asyncio.run(asyncio.sleep(ft.value))
         main()
