@@ -1,125 +1,76 @@
- # (c) @RknDeveloperr
-# Rkn Developer 
-# Don't Remove Credit 😔
+# (c) @RknDeveloperr
+# Maintained by @OveshBossOfficial
 
-from pyrogram import Client, filters
-from pyrogram.enums import MessageMediaType
-from pyrogram.file_id import FileId
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from hachoir.metadata import extractMetadata
-from hachoir.parser import createParser
-from PIL import Image
-
-from helper.utils import progress_for_pyrogram, convert, humanbytes, remove_path
-from helper.database import digital_botz
+import aiohttp, asyncio, warnings, pytz, datetime
+import logging, glob, sys, importlib.util
+from pathlib import Path
+from pyrogram import Client, idle, errors
 from config import Config
-from plugins.auto_rename import EnhancedAutoRenamer
+from plugins.web_support import web_server
 
-import os, time, asyncio
+# Safe Import for 'app'
+try:
+    from plugins.file_rename import app
+except ImportError:
+    app = None
 
-UPLOAD_TEXT = "🚀 Uploading..."
-DOWNLOAD_TEXT = "⚡ Downloading..."
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(message)s")
 
-renamer = EnhancedAutoRenamer()
-
-
-@Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
-async def rename_start(client, message):
-    media = getattr(message, message.media.value)
-    filename = media.file_name or "file.mkv"
-
-    size = humanbytes(media.file_size)
-    mime = media.mime_type
-    dcid = FileId.decode(media.file_id).dc_id
-
-    buttons = [[InlineKeyboardButton("📁 Document", callback_data="upload#document")]]
-
-    if message.media in [MessageMediaType.VIDEO, MessageMediaType.DOCUMENT]:
-        buttons.append([InlineKeyboardButton("🎥 Video", callback_data="upload#video")])
-    elif message.media == MessageMediaType.AUDIO:
-        buttons.append([InlineKeyboardButton("🎵 Audio", callback_data="upload#audio")])
-
-    await message.reply(
-        f"""**Select Output Type**
-
-📄 `{filename}`
-📦 `{size}`
-📡 DC `{dcid}`""",
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
-
-
-async def upload_doc(client, update):
-    msg = await update.message.edit("`Processing...`")
-    user_id = update.from_user.id
-
-    file = update.message.reply_to_message
-    media = getattr(file, file.media.value)
-
-    info = renamer.extract_all_info(media.file_name)
-    user = await digital_botz.get_user_data(user_id)
-
-    new_name = renamer.apply_format_template(info, user.get("format_template"))
-    if not new_name.endswith(f".{info['extension']}"):
-        new_name += f".{info['extension']}"
-
-    path = f"Renames/{new_name}"
-
-    await msg.edit(DOWNLOAD_TEXT)
-
-    dl = await client.download_media(
-        file,
-        file_name=path,
-        in_memory=False,
-        progress=progress_for_pyrogram,
-        progress_args=(DOWNLOAD_TEXT, msg, time.time())
-    )
-
-    duration = 0
-    try:
-        meta = extractMetadata(createParser(path))
-        if meta and meta.has("duration"):
-            duration = meta.get("duration").seconds
-    except:
-        pass
-
-    caption = user.get("caption")
-    if caption:
-        caption = caption.format(
-            filename=new_name,
-            filesize=humanbytes(media.file_size),
-            duration=convert(duration)
+class DigitalAutoRenameBot(Client):
+    def __init__(self):
+        super().__init__(
+            name="DigitalRenameBot",
+            api_id=Config.API_ID, api_hash=Config.API_HASH, bot_token=Config.BOT_TOKEN,
+            workers=200, plugins={"root": "plugins"}
         )
-    else:
-        caption = f"**{new_name}**"
+                
+    async def start(self):
+        await super().start()
+        me = await self.get_me()
+        Config.BOT = self
+        
+        # Start Web Server
+        runner = aiohttp.web.AppRunner(await web_server())
+        await runner.setup()
+        await aiohttp.web.TCPSite(runner, "0.0.0.0", Config.PORT).start()
+        
+        # --- AI POWERED WELCOME MESSAGE ---
+        welcome_text = (
+            f"🚀 **{me.first_name.upper()} ɪs ɴᴏᴡ ᴀʟɪᴠᴇ!**\n\n"
+            f"🤖 **ᴍᴏᴅᴇ:** `ᴀɪ-ᴘᴏᴡᴇʀᴇᴅ ᴜʟᴛʀᴀ ғᴀsᴛ`\n"
+            f"⚡ **ᴇɴɢɪɴᴇ:** `sᴜᴘᴇʀ sᴏɴɪᴄ v3`\n\n"
+            f"🌟 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ: @OveshBossOfficial**"
+        )
 
-    thumb = None
-    if user.get("file_id"):
-        thumb = await client.download_media(user["file_id"])
-    elif media.thumbs:
-        thumb = await client.download_media(media.thumbs[0].file_id)
+        for admin_id in Config.ADMIN:
+            try: await self.send_message(admin_id, welcome_text)
+            except: pass
+                    
+        if Config.LOG_CHANNEL:
+            curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+            log_msg = (
+                f"✨ **{me.mention} ʀᴇsᴛᴀʀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ !!**\n\n"
+                f"📅 **ᴅᴀᴛᴇ :** `{curr.strftime('%d %B, %Y')}`\n"
+                f"🚀 **ᴇɴɢɪɴᴇ :** `ᴀɪ ᴘᴏᴡᴇʀᴇᴅ ᴘᴏᴡᴇʀғᴜʟ`\n\n"
+                f"👑 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ : @OveshBossOfficial**"
+            )
+            try: await self.send_message(Config.LOG_CHANNEL, log_msg)
+            except: print("Make Bot Admin in Log Channel!")
 
-    if thumb:
-        Image.open(thumb).convert("RGB").resize((320, 320)).save(thumb)
+    async def stop(self, *args):
+        await super().stop()
 
-    await msg.edit(UPLOAD_TEXT)
-    upload_type = update.data.split("#")[1]
+digital_instance = DigitalAutoRenameBot()
 
-    send = {
-        "document": client.send_document,
-        "video": client.send_video,
-        "audio": client.send_audio
-    }[upload_type]
+async def start_services():
+    # Start User Session if exists
+    if Config.STRING_SESSION and app:
+        try: await app.start()
+        except Exception as e: print(f"User Session Error: {e}")
+    
+    await digital_instance.start()
+    await idle()
 
-    sent = await send(
-        chat_id=update.from_user.id,
-        **{upload_type: path},
-        caption=caption,
-        thumb=thumb,
-        duration=duration,
-        progress=progress_for_pyrogram,
-        progress_args=(UPLOAD_TEXT, msg, time.time())
-    )
-
-    await remove_path(thumb, path, dl)
-    await msg.edit("✅ **Uploaded Super Fast!**")
+if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
+    asyncio.get_event_loop().run_until_complete(start_services())
