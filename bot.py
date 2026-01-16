@@ -1,126 +1,156 @@
 # (c) @RknDeveloperr
-# Maintained by @OveshBossOfficial
-# Optimized for High Speed & Render Support
+# Rkn Developer 
+# Don't Remove Credit 😔
+# Telegram Channel @RknDeveloper & @Rkn_Botz
+# Developer @RknDeveloperr
+# Special Thanks To @ReshamOwner
+# Update Channel @Digital_Botz & @DigitalBotz_Support
+"""
+Apache License 2.0
+Copyright (c) 2025 @Digital_Botz
+"""
 
-import aiohttp
-import asyncio
-import warnings
-import pytz
-import datetime
+# extra imports
+import aiohttp, asyncio, warnings, pytz, datetime
 import logging
-import glob
-import sys
+import logging.config
+import glob, sys
 import importlib.util
 from pathlib import Path
 
-from pyrogram import Client, errors, idle, __version__
+# pyrogram imports
+from pyrogram import Client, __version__, errors
 from pyrogram.raw.all import layer
+from pyrogram import idle
 
+# bots imports
 from config import Config
 from plugins.web_support import web_server
+from plugins.file_rename import app
 
-# ================= logging ================= #
-
+# Get logging configurations
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("bot.log"),
-        logging.StreamHandler()
-    ]
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler('BotLog.txt'),
+             logging.StreamHandler()]
 )
-
-logging.getLogger("pyrogram").setLevel(logging.WARNING)
+#logger = logging.getLogger(__name__)
 logging.getLogger("pyrofork").setLevel(logging.WARNING)
 
-# ================= bot class ================= #
-
-class AutoRenameBot(Client):
+class DigitalAutoRenameBot(Client):
     def __init__(self):
         super().__init__(
-            name="autorenamebot",
+            name="DigitalRenameBot",
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
-            workers=300,
+            workers=200,
             plugins={"root": "plugins"},
-            sleep_threshold=10,
-            max_concurrent_transmissions=100
+            sleep_threshold=5,
+            max_concurrent_transmissions=50
         )
-
+                
+         
     async def start(self):
-        try:
-            await super().start()
-        except errors.AuthKeyUnregistered:
-            print("❌ ᴇʀʀᴏʀ: sᴛʀɪɴɢ sᴇssɪᴏɴ ᴇxᴘɪʀᴇᴅ. ᴜᴘᴅᴀᴛᴇ ɪɴ ʀᴇɴᴅᴇʀ!")
-            return
-
+        await super().start()
         me = await self.get_me()
-        self.username = me.username
         self.mention = me.mention
+        self.username = me.username  
+        self.uptime = Config.BOT_UPTIME
+        self.premium = Config.PREMIUM_MODE
+        self.uploadlimit = Config.UPLOAD_LIMIT_MODE
         Config.BOT = self
         
-        # ================= web server ================= #
-        runner = aiohttp.web.AppRunner(await web_server())
-        await runner.setup()
-        await aiohttp.web.TCPSite(runner, "0.0.0.0", Config.PORT).start()
-
-        # ================= load plugins ================= #
-        # Note: file_rename.py is automatically loaded by the plugins dict in __init__
-        # Manual loading is removed to prevent 'ImportError' and conflicts
+        app_runner = aiohttp.web.AppRunner(await web_server())
+        await app_runner.setup()
+        bind_address = "0.0.0.0"
+        await aiohttp.web.TCPSite(app_runner, bind_address, Config.PORT).start()
         
-        print(f"🚀 ʙᴏᴛ sᴛᴀʀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ ᴀs {me.first_name.lower()}")
+        path = "plugins/*.py"
+        files = glob.glob(path)
+        for name in files:
+            with open(name) as a:
+                patt = Path(a.name)
+                plugin_name = patt.stem.replace(".py", "")
+                plugins_path = Path(f"plugins/{plugin_name}.py")
+                import_path = "plugins.{}".format(plugin_name)
+                spec = importlib.util.spec_from_file_location(import_path, plugins_path)
+                load = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(load)
+                sys.modules["plugins" + plugin_name] = load
+                print("ᴅɪɢɪᴛᴀʟ ʙᴏᴛᴢ ɪᴍᴘᴏʀᴛᴇᴅ " + plugin_name)
+                
+        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
 
-        # ================= log channel ================= #
+        # --- Attractive Welcome Message for Admin ---
+        welcome_text = (
+            f"🚀 **{me.first_name.upper()} ɪs ɴᴏᴡ ᴀʟɪᴠᴇ!**\n\n"
+            f"🤖 **ᴍᴏᴅᴇ:** `ᴀɪ-ᴘᴏᴡᴇʀᴇᴅ ᴜʟᴛʀᴀ ғᴀsᴛ`\n"
+            f"⚡ **sᴘᴇᴇᴅ:** `ᴜʟᴛʀᴀ sᴏɴɪᴄ ᴘᴏᴡᴇʀ`\n"
+            f"📂 **sᴛᴀᴛᴜs:** `ʀᴇᴀᴅʏ ᴛᴏ ʀᴇɴᴀᴍᴇ`\n\n"
+            f"🌟 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ: @OveshBossOfficial**\n"
+            f"👨‍💻 **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @RknDeveloperr**"
+        )
+
+        for id in Config.ADMIN:
+            try: await self.send_message(id, welcome_text)                                
+            except: pass
+                    
         if Config.LOG_CHANNEL:
             try:
                 curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
-                # Attractive Welcome Message for Admin/Logs
+                date = curr.strftime('%d %B, %Y')
+                time = curr.strftime('%I:%M:%S %p')
+                # Attractive Log Message
                 log_msg = (
-                    f"🚀 **{me.first_name.upper()} ɪs ɴᴏᴡ ᴀʟɪᴠᴇ!**\n\n"
-                    f"🤖 **ᴍᴏᴅᴇ:** `ᴀɪ-ᴘᴏᴡᴇʀᴇᴅ ᴜʟᴛʀᴀ ғᴀsᴛ`\n"
-                    f"⚡ **ᴇɴɢɪɴᴇ:** `sᴜᴘᴇʀ sᴏɴɪᴄ 10ᴍʙ/s+`\n"
-                    f"📂 **sᴛᴀᴛᴜs:** `ᴘᴏᴡᴇʀғᴜʟ ʀᴇɴᴀᴍᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ`\n"
-                    f"📅 **ᴅᴀᴛᴇ:** `{curr.strftime('%d %b %Y').lower()}`\n\n"
-                    f"🌟 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ: @OveshBossOfficial**\n"
-                    f"✨ **ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ: @RknDeveloperr**"
+                    f"✨ **{me.mention} ʀᴇsᴛᴀʀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ !!**\n\n"
+                    f"📅 **ᴅᴀᴛᴇ :** `{date}`\n"
+                    f"⏰ **ᴛɪᴍᴇ :** `{time}`\n"
+                    f"🚀 **ᴇɴɢɪɴᴇ :** `ᴀɪ ᴘᴏᴡᴇʀᴇᴅ ᴘᴏᴡᴇʀғᴜʟ`\n\n"
+                    f"👑 **ᴘᴏᴡᴇʀᴇᴅ ʙʏ : @OveshBossOfficial**"
                 )
-                await self.send_message(Config.LOG_CHANNEL, log_msg)
-            except Exception as e:
-                print(f"ʟᴏɢ ᴄʜᴀɴɴᴇʟ ᴇʀʀᴏʀ: {e}")
+                await self.send_message(Config.LOG_CHANNEL, log_msg)                                
+            except:
+                print("Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
 
     async def stop(self, *args):
+        for id in Config.ADMIN:
+            try: await self.send_message(id, f"**ʙᴏᴛ sᴛᴏᴘᴘᴇᴅ....**")                                
+            except: pass
+                
+        print("Bot Stopped 🙄")
         await super().stop()
-        print("❌ ʙᴏᴛ sᴛᴏᴘᴘᴇᴅ")
 
-# ================= start services ================= #
 
-bot = AutoRenameBot()
+digital_instance = DigitalAutoRenameBot()
 
-async def main():
-    # Dynamically import app only if STRING_SESSION exists
-    user_app = None
-    if Config.STRING_SESSION:
-        try:
-            from plugins.file_rename import app as user_app
-            await user_app.start()
-            print("✅ ᴜsᴇʀ sᴇssɪᴏɴ (ᴘʀᴇᴍɪᴜᴍ) sᴛᴀʀᴛᴇᴅ")
-        except Exception as e:
-            print(f"❌ ᴜsᴇʀ sᴇssɪᴏɴ ᴇʀʀᴏʀ: {str(e).lower()}")
-
-    try:
-        await bot.start()
+def main():
+    async def start_services():
+        if Config.STRING_SESSION:
+            await asyncio.gather(app.start(), digital_instance.start())
+        else:
+            await asyncio.gather(digital_instance.start())
+        
         await idle()
-    except Exception as e:
-        print(f"❌ ʀᴜɴᴛɪᴍᴇ ᴇʀʀᴏʀ: {str(e).lower()}")
+        
+        if Config.STRING_SESSION:
+            await asyncio.gather(app.stop(), digital_instance.stop())
+        else:
+            await asyncio.gather(digital_instance.stop())
+
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(start_services())
+    except KeyboardInterrupt:
+        print("\n🛑 Bot stopped by user!")
     finally:
-        if user_app:
-            await user_app.stop()
-        await bot.stop()
+        loop.close()
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore")
+    warnings.filterwarnings("ignore", message="There is no current event loop")
     try:
-        asyncio.get_event_loop().run_until_complete(main())
-    except KeyboardInterrupt:
-        pass
+        main()
+    except errors.FloodWait as ft:
+        print(f"⏳ FloodWait: Sleeping for {ft.value} seconds")
+        asyncio.run(asyncio.sleep(ft.value))
+        main()
